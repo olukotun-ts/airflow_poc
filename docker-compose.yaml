@@ -92,6 +92,8 @@ services:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
+    ports:
+      - "54320:5432"
     volumes:
       - type: volume
         source: postgres-db-volume
