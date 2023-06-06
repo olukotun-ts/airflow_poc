@@ -17,14 +17,14 @@ POSTGRES_PORT = os.getenv("POSTGRES_PORT")
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 
 @dag(
-    dag_id="populate_nyt_archive",
+    dag_id="update_nyt_archive",
     schedule=datetime.timedelta(days=1),
     start_date=datetime.datetime.now(),
     catchup=False,
     dagrun_timeout=datetime.timedelta(minutes=60),
     tags=["nyt"]
 )
-def PopulateNYTArchive():
+def UpdateNYTArchive():
     # todo: Can operator read env file?
     create_nyt_archive_table = PostgresOperator(
         task_id="create_nyt_archive_table",
@@ -114,4 +114,4 @@ def PopulateNYTArchive():
 
     create_nyt_archive_table >> read_archive >> save_articles
 
-PopulateNYTArchive()
+UpdateNYTArchive()
