@@ -3,6 +3,9 @@ config/
 logs/
 plugins/
 
+# Mac
+.DS_Store
+
 # ##############################################################
 # https://github.com/github/gitignore/blob/main/Python.gitignore
 # ##############################################################
