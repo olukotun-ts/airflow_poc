@@ -17,19 +17,19 @@ POSTGRES_PORT = os.getenv("POSTGRES_PORT")
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 
 @dag(
-    dag_id="update_articles",
+    dag_id="update_nyt_articles",
     schedule=datetime.timedelta(minutes=15),
     start_date=datetime.datetime.now(),
     catchup=False,
     dagrun_timeout=datetime.timedelta(minutes=10),
     tags=["nyt"]
 )
-def UpdateArticles():
+def UpdateNYTArticles():
     # todo: Can operator read env file?
-    create_articles_table = PostgresOperator(
-        task_id="create_articles_table",
+    create_nyt_articles_table = PostgresOperator(
+        task_id="create_nyt_articles_table",
         postgres_conn_id="dev_db",
-        sql="sql/create_articles.sql"
+        sql="sql/create_nyt_articles.sql"
     )
 
     # todo: Try PostgresOperator
@@ -61,9 +61,9 @@ def UpdateArticles():
                         (article ->> 'pub_date')::timestamp AS pub_date,
                         article -> 'web_url' AS url
                     FROM nyt_archive
-                    WHERE (article ->> 'web_url') NOT IN (
-                        SELECT url FROM articles
-                    )
+                    WHERE 
+                        article ->> 'web_url' NOT IN (SELECT url FROM articles) AND
+                        article ->> 'document_type' = 'article'
                     LIMIT 10;
                 """
                 cursor.execute(query)
@@ -77,7 +77,7 @@ def UpdateArticles():
         conn, cursor = get_connection()
         with conn:
             with cursor:
-                insert_query = "INSERT INTO articles (id, headline, abstract, lead_paragraph, byline, type, pub_date, url) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+                insert_query = "INSERT INTO nyt_articles (id, headline, abstract, lead_paragraph, byline, type, pub_date, url) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
                 for article in articles:
                     cursor.execute(insert_query, article)
                 conn.commit()
@@ -86,6 +86,6 @@ def UpdateArticles():
     read_nyt_archive_table = read_nyt_archive()
     update_articles_table = update_articles(read_nyt_archive_table)
 
-    create_articles_table >> read_nyt_archive_table >> update_articles_table
+    create_nyt_articles_table >> read_nyt_archive_table >> update_articles_table
 
-UpdateArticles()
+UpdateNYTArticles()

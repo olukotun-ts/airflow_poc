@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS articles (
+CREATE TABLE IF NOT EXISTS nyt_articles (
     id UUID,
     headline TEXT,
     abstract TEXT,
