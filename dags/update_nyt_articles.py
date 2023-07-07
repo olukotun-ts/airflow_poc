@@ -52,17 +52,17 @@ def UpdateNYTArticles():
             with cursor:
                 query = """
                     SELECT 
-                        REPLACE(article ->> 'uri', 'nyt://article/', '') AS id,
-                        article -> 'headline' -> 'main' AS headline,
-                        article -> 'abstract' AS abstract,
-                        article -> 'lead_paragraph' AS lead_paragraph,
-                        article -> 'byline' -> 'original' AS byline,
-                        article -> 'type_of_material' AS type,
-                        (article ->> 'pub_date')::timestamp AS pub_date,
-                        article -> 'web_url' AS url
+                        REPLACE(article ->> 'uri', 'nyt://article/', '')::UUID AS id,
+                        article -> 'headline' ->> 'main' AS headline,
+                        article ->> 'abstract' AS abstract,
+                        article ->> 'lead_paragraph' AS lead_paragraph,
+                        article -> 'byline' ->> 'original' AS byline,
+                        article ->> 'type_of_material' AS type,
+                        (article ->> 'pub_date')::TIMESTAMP AS pub_date,
+                        article ->> 'web_url' AS url
                     FROM nyt_archive
                     WHERE 
-                        article ->> 'web_url' NOT IN (SELECT url FROM articles) AND
+                        article ->> 'web_url' NOT IN (SELECT url FROM nyt_articles) AND
                         article ->> 'document_type' = 'article'
                     LIMIT 10;
                 """

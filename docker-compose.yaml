@@ -88,6 +88,17 @@ x-airflow-common:
       condition: service_healthy
 
 services:
+  articles-processor:
+    build: .
+    # volumes:
+    #   - .:/app
+    # working_dir: /app
+    # command: python process_articles.py
+    restart: on-failure
+    depends_on:
+      - postgres
+      - airflow-scheduler
+
   postgres:
     image: postgres:13
     environment:
@@ -98,6 +109,8 @@ services:
       - type: volume
         source: postgres-db-volume
         target: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
